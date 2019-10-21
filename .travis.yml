@@ -14,7 +14,6 @@ addons:
   apt:
     packages:
       - bc
-      - gcc-multilib
       - libssl-dev
       - llvm-dev
       - libjemalloc1
@@ -24,7 +23,6 @@ addons:
       - libelf-dev
       - selinux-policy-dev
       - libunbound-dev
-      - libunbound-dev:i386
       - libunwind-dev
 
 before_install: ./.travis/${TRAVIS_OS_NAME}-prepare.sh
@@ -49,6 +47,9 @@ matrix:
   include:
     - os: osx
       compiler: clang
+      env: OPTS="--disable-ssl"
+    - os: linux-ppc64le
+      compiler: gcc
       env: OPTS="--disable-ssl"
 
 script: ./.travis/${TRAVIS_OS_NAME}-build.sh $OPTS
