@@ -6,7 +6,12 @@ set -x
 CFLAGS_FOR_OVS="-g -O2"
 SPARSE_FLAGS=""
 EXTRA_OPTS="--enable-Werror"
-TARGET="x86_64-native-linuxapp-gcc"
+
+if [ $TRAVIS_ARCH == amd64 ]; then
+   TARGET="x86_64-native-linuxapp-gcc"
+elif [ $TRAVIS_ARCH == ppc64le ]; then
+   TARGET="ppc_64-power8-linuxapp-gcc"
+fi
 
 function install_kernel()
 {
@@ -177,6 +182,10 @@ elif [ "$M32" ]; then
     # Adding m32 flag directly to CC to avoid any posiible issues with API/ABI
     # difference on 'configure' and 'make' stages.
     export CC="$CC -m32"
+elif [[ "$DPDK" ]] || [[ $DPDK_SHARED ]] && [ $TRAVIS_ARCH == ppc64le ]; then
+    # Disable sparse on ppc64le when building with dpdk.
+    # Sparse is not passing -maltivec around properly resulting in build errors.
+    echo Disabling sparse on ppc64le.
 else
     OPTS="--enable-sparse"
     if [ "$AFXDP" ]; then
