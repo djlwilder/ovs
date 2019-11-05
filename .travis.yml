@@ -3,6 +3,10 @@ compiler:
   - gcc
   - clang
 
+arch:
+  - amd64
+  - ppc64le
+
 os:
   - linux
 
@@ -48,18 +52,6 @@ matrix:
     - os: osx
       compiler: clang
       env: OPTS="--disable-ssl"
-    - os: linux-ppc64le
-      compiler: gcc
-      env: OPTS="--disable-ssl"
-    - os: linux-ppc64le
-      compiler: gcc
-      env: DPDK=1 OPTS="--enable-shared"
-    - os: linux-ppc64le
-      compiler: gcc
-      env: DPDK_SHARED=1
-    - os: linux-ppc64le
-      compiler: gcc
-      env: DPDK_SHARED=1 OPTS="--enable-shared"
 
 script: ./.travis/${TRAVIS_OS_NAME}-build.sh $OPTS
 
