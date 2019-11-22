@@ -6,7 +6,7 @@ set -x
 CFLAGS_FOR_OVS="-g -O2"
 SPARSE_FLAGS=""
 EXTRA_OPTS="--enable-Werror"
-TARGET="x86_64-native-linuxapp-gcc"
+TARGET=""
 
 function install_kernel()
 {
@@ -85,32 +85,42 @@ function install_kernel()
 function install_dpdk()
 {
     local DPDK_VER=$1
-    local VERSION_FILE="dpdk-dir/travis-dpdk-cache-version"
-
+    if [ -z "$TARGET" -a -z "$TRAVIS_ARCH" ] ||
+       [ "$TRAVIS_ARCH" == "amd64" ]; then
+        TARGET="x86_64-native-linuxapp-gcc"
+    else
+        echo "Target is unknown"
+        exit 1
+    fi
+    local DPDK_CACHE="dpdk-dir/${TARGET}-cache"
+    local VERSION_FILE="${DPDK_CACHE}/travis-dpdk-cache-version"
     if [ "${DPDK_VER##refs/*/}" != "${DPDK_VER}" ]; then
         # Avoid using cache for git tree build.
-        rm -rf dpdk-dir
+        rm -rf ${DPDK_CACHE}
 
         DPDK_GIT=${DPDK_GIT:-https://dpdk.org/git/dpdk}
-        git clone --single-branch $DPDK_GIT dpdk-dir -b "${DPDK_VER##refs/*/}"
-        pushd dpdk-dir
+        git clone --single-branch \
+                  $DPDK_GIT ${DPDK_CACHE} -b "${DPDK_VER##refs/*/}"
+        pushd ${DPDK_CACHE}
         git log -1 --oneline
     else
         if [ -f "${VERSION_FILE}" ]; then
             VER=$(cat ${VERSION_FILE})
             if [ "${VER}" = "${DPDK_VER}" ]; then
-                EXTRA_OPTS="${EXTRA_OPTS} --with-dpdk=$(pwd)/dpdk-dir/build"
-                echo "Found cached DPDK ${VER} build in $(pwd)/dpdk-dir"
+                EXTRA_OPTS="${EXTRA_OPTS} \
+                    --with-dpdk=$(pwd)/${DPDK_CACHE}/build"
+                echo "Found cached DPDK ${VER} build in \
+                      $(pwd)/${DPDK_CACHE}"
                 return
             fi
         fi
         # No cache or version mismatch.
-        rm -rf dpdk-dir
+        rm -rf ${DPDK_CACHE}
         wget https://fast.dpdk.org/rel/dpdk-$1.tar.xz
         tar xvf dpdk-$1.tar.xz > /dev/null
         DIR_NAME=$(tar -tf dpdk-$1.tar.xz | head -1 | cut -f1 -d"/")
-        mv ${DIR_NAME} dpdk-dir
-        pushd dpdk-dir
+        mv ${DIR_NAME} ${DPDK_CACHE}
+        pushd ${DPDK_CACHE}
     fi
 
     make config CC=gcc T=$TARGET
