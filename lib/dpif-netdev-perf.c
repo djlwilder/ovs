@@ -63,6 +63,7 @@ pmd_perf_estimate_tsc_frequency(void)
     struct pmd_perf_stats s;
     uint64_t start, stop;
 
+    memset(&s, 0, sizeof(s));
     /* DPDK is not available or returned unreliable value.
      * Trying to estimate. */
     affinity = ovs_numa_thread_getaffinity_dump();
