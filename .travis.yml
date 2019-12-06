@@ -6,6 +6,10 @@ compiler:
 os:
   - linux
 
+arch: 
+  - amd64
+  - ppc64le
+
 cache:
   directories:
     - dpdk-dir
@@ -50,9 +54,18 @@ matrix:
     - os: osx
       compiler: clang
       env: OPTS="--disable-ssl"
+  exclude:
     - arch: ppc64le
-      compiler: gcc
-      env: OPTS="--disable-ssl"
+      compiler: clang
+    - arch: ppc64le
+      env: KERNEL_LIST="5.0  4.20 4.19 4.18 4.17 4.16"
+    - arch: ppc64le
+      env: KERNEL_LIST="4.15 4.14 4.9  4.4  3.19 3.16"
+    - arch: ppc64le
+      env: AFXDP=1 KERNEL=5.3
+    - arch: ppc64le
+      env: M32=1 OPTS="--disable-ssl"
+
 
 script: ./.travis/${TRAVIS_OS_NAME}-build.sh $OPTS
 
