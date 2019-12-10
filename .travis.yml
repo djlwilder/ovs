@@ -41,8 +41,9 @@ env:
   - TESTSUITE=1 OPTS="--enable-shared"
   - TESTSUITE=1 DPDK=1
   - TESTSUITE=1 LIBS=-ljemalloc
-  - KERNEL_LIST="5.0  4.20 4.19 4.18 4.17 4.16"
-  - KERNEL_LIST="4.15 4.14 4.9  4.4  3.19 3.16"
+  - KERNEL_LIST="5.0 4.20 4.19 4.18 4.17 4.16"
+  - KERNEL_LIST="4.15 4.14 4.9 4.4"
+  - KERNEL_LIST="3.19 3.16"
   - AFXDP=1 KERNEL=5.3
   - M32=1 OPTS="--disable-ssl"
   - DPDK=1 OPTS="--enable-shared"
@@ -54,18 +55,17 @@ matrix:
     - os: osx
       compiler: clang
       env: OPTS="--disable-ssl"
+    - arch: ppc64le
+      env: TESTSUITE=1 KERNEL=4.16
   exclude:
     - arch: ppc64le
       compiler: clang
     - arch: ppc64le
-      env: KERNEL_LIST="5.0  4.20 4.19 4.18 4.17 4.16"
+      env: TESTSUITE=1 KERNEL=3.16
     - arch: ppc64le
-      env: KERNEL_LIST="4.15 4.14 4.9  4.4  3.19 3.16"
-    - arch: ppc64le
-      env: AFXDP=1 KERNEL=5.3
+      env: KERNEL_LIST="3.19 3.16"
     - arch: ppc64le
       env: M32=1 OPTS="--disable-ssl"
-
 
 script: ./.travis/${TRAVIS_OS_NAME}-build.sh $OPTS
 
