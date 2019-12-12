@@ -39,17 +39,12 @@ function install_kernel()
     tar xvf linux-${version}.tar.xz > /dev/null
     pushd linux-${version}
 
-    make allmodconfig
-
     # ppc64le is not covered by the regular allmodconfig, which is big endian.
     if [ "$TRAVIS_ARCH" == "ppc64le" ]; then
-       ! make ppc64le_allmodconfig
-       if [ "$?" == 0 ]; then
-       # Kernel is too old, fall back to manually editing the configuration.
-          make defconfig
-          echo "CONFIG_OPENVSWITCH=m" >> .config
-          echo "CONFIG_BRIDGE=m" >> .config
-      fi
+       make KCONFIG_ALLCONFIG=./arch/powerpc/configs/le.config \
+       -f ./Makefile allmodconfig
+    else
+       make allmodconfig
     fi
 
     # Cannot use CONFIG_KCOV: -fsanitize-coverage=trace-pc is not supported by compiler
