@@ -7,6 +7,10 @@ CFLAGS_FOR_OVS="-g -O2"
 SPARSE_FLAGS=""
 EXTRA_OPTS="--enable-Werror"
 
+function convert_to_integer {
+    echo "$@" | awk -F "." '{ printf("%03d%03d%03d\n", $1,$2,$3); }';
+}
+
 function install_kernel()
 {
     if [[ "$1" =~ ^5.* ]]; then
@@ -64,6 +68,13 @@ function install_kernel()
         make net/openvswitch/
     else
         make net/bridge/
+    fi
+
+    # Out of tree module builds on ppc64le against kernels before v4.14
+    # will fail due to this missing dependency.
+    if [ "$TRAVIS_ARCH" == "ppc64le" ] &&
+       [ "$(convert_to_integer $1)" -lt "004014000" ];then
+         make arch/powerpc/lib/crtsavres.o
     fi
 
     if [ "$AFXDP" ]; then
