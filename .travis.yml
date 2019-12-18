@@ -50,6 +50,9 @@ matrix:
     - os: osx
       compiler: clang
       env: OPTS="--disable-ssl"
+    - arch: ppc64le
+      compiler: gcc
+      env: OPTS="--disable-ssl"
 
 script: ./.travis/${TRAVIS_OS_NAME}-build.sh $OPTS
 
