@@ -94,7 +94,7 @@ m4_define([DPIF_NETDEV_DUMMY_IFACE],
                      fail-mode=secure -- \
       add-port br1 p2 -- set interface p2 type=$1 options:stream=unix:$OVS_RUNDIR/p0.sock ofport_request=2 -- \
       add-port br1 p8 -- set interface p8 ofport_request=8 type=$1 --], [], [],
-      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,1,1,1,1"], [])])
+      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,8,8,8,8"], [])])
    AT_CHECK([ovs-appctl vlog/set dpif:dbg dpif_netdev:dbg])
 
    AT_CHECK([ovs-ofctl add-flow br0 action=normal])
@@ -126,7 +126,7 @@ m4_define([DPIF_NETDEV_MISS_FLOW_INSTALL],
       -- set interface p1 type=$1 options:pstream=punix:$OVS_RUNDIR/p0.sock \
       -- set bridge br0 datapath-type=dummy \
                         other-config:datapath-id=1234 fail-mode=secure], [], [],
-      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,1,1,1,1"], [])])
+      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,8,8,8,8"], [])])
    AT_CHECK([ovs-appctl vlog/set dpif:dbg dpif_netdev:dbg])
 
    AT_CHECK([ovs-ofctl add-flow br0 action=normal])
@@ -168,7 +168,7 @@ m4_define([DPIF_NETDEV_FLOW_PUT_MODIFY],
       add-port br0 p2 -- set interface p2 type=$1 ofport_request=2 options:pstream=punix:$OVS_RUNDIR/p2.sock -- \
       set bridge br0 datapath-type=dummy \
                      other-config:datapath-id=1234 fail-mode=secure], [], [],
-      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,1,1,1,1"], [])])
+      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,8,8,8,8"], [])])
    AT_CHECK([ovs-appctl vlog/set dpif:file:dbg dpif_netdev:file:dbg])
 
    # Add a flow that directs some packets received on p1 to p2 and the
@@ -222,7 +222,7 @@ m4_define([DPIF_NETDEV_MISS_FLOW_DUMP],
       -- set interface p1 type=$1 options:pstream=punix:$OVS_RUNDIR/p0.sock \
       -- set bridge br0 datapath-type=dummy \
                         other-config:datapath-id=1234 fail-mode=secure], [], [],
-      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,1,1,1,1"], [])])
+      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,8,8,8,8"], [])])
    AT_CHECK([ovs-appctl upcall/disable-ufid], [0], [Datapath dumping tersely using UFID disabled
 ], [])
    AT_CHECK([ovs-appctl vlog/set dpif:dbg dpif_netdev:dbg])
@@ -374,7 +374,7 @@ m4_define([DPIF_NETDEV_FLOW_HW_OFFLOAD],
       set interface p1 type=$1 ofport_request=1 options:pstream=punix:$OVS_RUNDIR/p1.sock options:ifindex=1 -- \
       set bridge br0 datapath-type=dummy \
                      other-config:datapath-id=1234 fail-mode=secure], [], [],
-      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,1,1,1,1"], [])])
+      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,8,8,8,8"], [])])
    AT_CHECK([ovs-appctl vlog/set dpif:file:dbg dpif_netdev:file:dbg netdev_dummy:file:dbg])
 
    AT_CHECK([ovs-vsctl set Open_vSwitch . other_config:hw-offload=true])
@@ -437,7 +437,7 @@ m4_define([DPIF_NETDEV_FLOW_HW_OFFLOAD_OFFSETS],
       set interface p1 type=$1 ofport_request=1 options:pcap=p1.pcap options:ifindex=1 -- \
       set bridge br0 datapath-type=dummy \
                      other-config:datapath-id=1234 fail-mode=secure], [], [],
-      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,1,1,1,1"], [])])
+      [m4_if([$1], [dummy-pmd], [--dummy-numa="0,0,0,0,8,8,8,8"], [])])
    AT_CHECK([ovs-appctl vlog/set dpif:file:dbg dpif_netdev:file:dbg netdev_dummy:file:dbg])
 
    AT_CHECK([ovs-vsctl set Open_vSwitch . other_config:hw-offload=true])
