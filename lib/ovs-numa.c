@@ -56,7 +56,6 @@ VLOG_DEFINE_THIS_MODULE(ovs_numa);
  * TODO: Fix ovs-numa when cpu hotplug is used.
  */
 
-#define MAX_NUMA_NODES 128
 
 /* numa node. */
 struct numa_node {
