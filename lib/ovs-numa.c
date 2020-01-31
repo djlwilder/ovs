@@ -170,19 +170,19 @@ discover_numa_and_core_dummy(void)
 
 }
 
+#ifdef __linux__
 /* Check if a cpu is detected and online */
 static int
 cpu_detected(unsigned core_id)
 {
-#ifdef __linux__
     char* path;
     path = xasprintf("/sys/devices/system/cpu/cpu%d/topology/core_id",core_id);
     if (access(path, F_OK) != 0)
         return 0;
 
     return 1;
-#endif /* __linux__ */
 }
+#endif /* __linux__ */
 
 /* Discovers all numa nodes and the corresponding cpu cores.
  * Constructs the 'struct numa_node' and 'struct cpu_core'. */
