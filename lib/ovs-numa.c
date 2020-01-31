@@ -42,16 +42,18 @@ VLOG_DEFINE_THIS_MODULE(ovs_numa);
  * This module stores the affinity information of numa nodes and cpu cores.
  * It also provides functions to bookkeep the pin of threads on cpu cores.
  *
- * It is assumed that the numa node ids and cpu core ids all start from 0 and
- * range continuously.  So, for example, if 'ovs_numa_get_n_cores()' returns N,
- * user can assume core ids from 0 to N-1 are all valid and there is a
- * 'struct cpu_core' for each id.
+ * It is assumed that the numa node ids and cpu core ids all start from 0.
+ * There is no guarantee that Node and cpu ids are numbed consecutively (this
+ * is a change from earlier version of the code). So, for example, if two nodes
+ * exist with ids 0 and 8, 'ovs_numa_get_n_nodes()' will return 2, no
+ * assumption of node numbering should be made.
  *
  * NOTE, this module should only be used by the main thread.
  *
- * NOTE, the assumption above will fail when cpu hotplug is used.  In that
- * case ovs-numa will not function correctly.  For now, add a TODO entry
- * for addressing it in the future.
+ * NOTE, if cpu hotplug is used 'all_numa_nodes' and 'all_cpu_cores' must be
+ * invalidated when ever the system topology changes. Support for detecting
+ * topology changes has not been included. For now, add a TODO entry for
+ * ddressing it in the future.
  *
  * TODO: Fix ovs-numa when cpu hotplug is used.
  */
@@ -169,10 +171,22 @@ discover_numa_and_core_dummy(void)
 
     free(conf);
 
-    if (max_numa_id + 1 != hmap_count(&all_numa_nodes)) {
-        ovs_fatal(0, "dummy numa contains non consecutive numa ids");
-    }
 }
+
+#ifdef __linux__
+/* Check if a cpu is detected and online */
+static int
+cpu_detected(unsigned int core_id)
+{
+    char *path;
+
+    path = xasprintf("/sys/devices/system/cpu/cpu%d/topology/core_id", core_id);
+    if (access(path, F_OK) != 0)
+        return 0;
+
+    return 1;
+}
+#endif /* __linux__ */
 
 /* Discovers all numa nodes and the corresponding cpu cores.
  * Constructs the 'struct numa_node' and 'struct cpu_core'. */
@@ -219,7 +233,8 @@ discover_numa_and_core(void)
                     unsigned core_id;
 
                     core_id = strtoul(subdir->d_name + 3, NULL, 10);
-                    insert_new_cpu_core(n, core_id);
+                    if (cpu_detected(core_id))
+                        insert_new_cpu_core(n, core_id);
                 }
             }
             closedir(dir);
@@ -229,9 +244,8 @@ discover_numa_and_core(void)
         }
 
         free(path);
-        if (!dir || !numa_supported) {
+        if (!numa_supported)
             break;
-        }
     }
 #endif /* __linux__ */
 }
