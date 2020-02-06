@@ -134,18 +134,28 @@ static char *
 construct_dpdk_socket_mem(void)
 {
     const char *def_value = "1024";
-    int numa, numa_nodes = ovs_numa_get_n_numas();
+    struct ovs_numa_dump *dump;
+    int last_node = 0;
+
+    /* Build a list of all numa nodes with at least one core */
+    dump = ovs_numa_dump_n_cores_per_numa(1);
     struct ds dpdk_socket_mem = DS_EMPTY_INITIALIZER;
-
-    if (numa_nodes == 0 || numa_nodes == OVS_NUMA_UNSPEC) {
-        numa_nodes = 1;
-    }
-
     ds_put_cstr(&dpdk_socket_mem, def_value);
-    for (numa = 1; numa < numa_nodes; ++numa) {
-        ds_put_format(&dpdk_socket_mem, ",%s", def_value);
-    }
 
+    const struct ovs_numa_info_numa *node;
+
+    FOR_EACH_NUMA_ON_DUMP(node, dump) {
+        while (node->numa_id > last_node+1 &&
+               node->numa_id != OVS_NUMA_UNSPEC &&
+               node->numa_id <= MAX_NUMA_NODES){
+                ds_put_format(&dpdk_socket_mem, ",%s", "0");
+                ++last_node;
+        }
+        if (node->numa_id != 0) {
+                ds_put_format(&dpdk_socket_mem, ",%s", def_value);
+        }
+    }
+    ovs_numa_dump_destroy(dump);
     return ds_cstr(&dpdk_socket_mem);
 }
 
