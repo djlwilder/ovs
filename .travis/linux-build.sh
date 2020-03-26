@@ -91,6 +91,8 @@ function install_dpdk()
         TARGET="x86_64-native-linuxapp-gcc"
     elif [ "$TRAVIS_ARCH" == "aarch64" ]; then
         TARGET="arm64-armv8a-linuxapp-gcc"
+    elif [ "$TRAVIS_ARCH" == "ppc64le" ]; then
+        TARGET="ppc_64-power8-linuxapp-gcc"
     else
         echo "Target is unknown"
         exit 1
@@ -186,7 +188,7 @@ elif [ "$M32" ]; then
     # Adding m32 flag directly to CC to avoid any posiible issues with API/ABI
     # difference on 'configure' and 'make' stages.
     export CC="$CC -m32"
-elif [ "$TRAVIS_ARCH" != "aarch64" ]; then
+elif [ "$TRAVIS_ARCH" != "aarch64" ] && [ "$TRAVIS_ARCH" != "ppc64le" ]; then
     OPTS="--enable-sparse"
     if [ "$AFXDP" ]; then
         # netdev-afxdp uses memset for 64M for umem initialization.
