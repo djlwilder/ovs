@@ -135,6 +135,7 @@ construct_dpdk_socket_mem(void)
     const char *def_value = "1024";
     struct ovs_numa_dump *dump;
     int last_node = 0;
+    const struct ovs_numa_info_numa *node;
 
     /* Build a list of all numa nodes with at least one core */
     dump = ovs_numa_dump_n_cores_per_numa(1);
