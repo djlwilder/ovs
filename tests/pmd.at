@@ -357,12 +357,29 @@ icmp,vlan_tci=0x0000,dl_src=50:54:00:00:00:09,dl_dst=50:54:00:00:00:0a,nw_src=10
 OVS_VSWITCHD_STOP
 AT_CLEANUP
 
-AT_SETUP([PMD - change numa node])
+AT_SETUP([PMD - change contiguous numa nodes ])
 OVS_VSWITCHD_START(
   [add-port br0 p1 -- set Interface p1 type=dummy-pmd ofport_request=1 options:n_rxq=2 -- \
    add-port br0 p2 -- set Interface p2 type=dummy-pmd ofport_request=2 options:n_rxq=2 -- \
    set Open_vSwitch . other_config:pmd-cpu-mask=3
 ], [], [], [--dummy-numa 0,1])
+AT_CHECK([ovs-appctl vlog/set dpif:dbg dpif_netdev:dbg])
+
+AT_CHECK([ovs-ofctl add-flow br0 action=controller])
+
+AT_CHECK([ovs-appctl dpif-netdev/pmd-rxq-show | parse_pmd_rxq_show], [0], [dnl
+p1 0 0 0
+p1 1 0 0
+p2 0 0 0
+p2 1 0 0
+])
+
+AT_SETUP([PMD - change non-contiguous numa nodes])
+OVS_VSWITCHD_START(
+  [add-port br0 p1 -- set Interface p1 type=dummy-pmd ofport_request=1 options:n_rxq=2 -- \
+   add-port br0 p2 -- set Interface p2 type=dummy-pmd ofport_request=2 options:n_rxq=2 -- \
+   set Open_vSwitch . other_config:pmd-cpu-mask=3
+], [], [], [--dummy-numa 0,8])
 AT_CHECK([ovs-appctl vlog/set dpif:dbg dpif_netdev:dbg])
 
 AT_CHECK([ovs-ofctl add-flow br0 action=controller])
